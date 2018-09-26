@@ -7,7 +7,7 @@ Detection and removal of immune epitopes in proteins
 
 Authors
 =====
-Steffen Lemke\n
-Alexander Röhl\m 
+Steffen Lemke
+Alexander Röhl
 Lukas Heumos       
 
