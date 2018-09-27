@@ -16,7 +16,6 @@ def write_consensus_sequence(msa_content, threshold):
     LOG.info("Compute majority classes and gapcounts")
     for section in msa_content:
         section = parse_for_sequence_only(section)
-        # print(section)
         for i in range(len(section[0])): #acidpos in line
             aminoacids_at_position = []
             for j in range(len(section)): #line
@@ -30,9 +29,14 @@ def write_consensus_sequence(msa_content, threshold):
             if aminoacids_at_position:
                 major_class, gapcount = compute_majorities(aminoacids_at_position, threshold)
                 consensus_array.append([aminoacids_at_position[0], major_class, gapcount])
+
     LOG.info("Finish computation for majority classes and gapcounts")
     LOG.info("End writing consensus array")
     LOG.info("Write consensus array in textfiles")
+    with open('data/sequence.fasta', 'w') as f:
+        f.write('>sequence\n')
+        for x in consensus_array:
+            f.write(str(x[0]))
     with open('data/consensus_array.txt', 'w') as f:
         f.write('\n'.join(str(x) for x in consensus_array))
     with open('data/consensus_array_titled.txt', 'w') as f:
