@@ -6,7 +6,7 @@ Explanation
 
 Quick Setup for developers
 =====
-1. <code>first step</code>
+1. <code>git clone https://github.com/steffenlem/Deimmunization</code>
 2. <code>pip python setup.py install</code>
 3. <code>deimmunization</code>
 
