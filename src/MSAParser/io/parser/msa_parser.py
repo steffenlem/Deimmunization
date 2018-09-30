@@ -3,7 +3,7 @@ import logging
 console = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
-LOG = logging.getLogger("File parser")
+LOG = logging.getLogger("MSA Parser")
 LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 

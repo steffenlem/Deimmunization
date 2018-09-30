@@ -1,7 +1,7 @@
-from Deimmunization.MSAParser.model.aminoacid_classes import aminoacid_classes_by_number
-from Deimmunization.MSAParser.model.aminoacid_classes import aminoacid_classes_by_code
-from Deimmunization.MSAParser.model.aminoacid_classes import one_letter_encoding_to_number
-from Deimmunization.MSAParser.model.aminoacid_classes import one_letter_encoding_to_letter
+from src.MSAParser.model.aminoacid_classes import aminoacid_classes_by_number
+from src.MSAParser.model.aminoacid_classes import aminoacid_classes_by_code
+from src.MSAParser.model.aminoacid_classes import one_letter_encoding_to_number
+from src.MSAParser.model.aminoacid_classes import one_letter_encoding_to_letter
 
 
 def compute_majorities(position_specific_list_of_acids, threshold):

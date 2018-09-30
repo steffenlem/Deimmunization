@@ -1,6 +1,6 @@
 import logging
 
-from Deimmunization.MSAParser.algorithm.majority_count import compute_majorities
+from src.MSAParser.algorithm.majority_count import compute_majorities
 
 console = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -11,7 +11,7 @@ LOG.setLevel(logging.INFO)
 
 
 def write_consensus_sequence(msa_content, threshold):
-    LOG.info("Start writing consensus array")
+    LOG.info("Writing consensus array")
     consensus_array = []
     LOG.info("Compute majority classes and gapcounts")
     for section in msa_content:
@@ -30,9 +30,9 @@ def write_consensus_sequence(msa_content, threshold):
                 major_class, gapcount = compute_majorities(aminoacids_at_position, threshold)
                 consensus_array.append([aminoacids_at_position[0], major_class, gapcount])
 
-    LOG.info("Finish computation for majority classes and gapcounts")
-    LOG.info("End writing consensus array")
-    LOG.info("Write consensus array in textfiles")
+    LOG.info("Successfully finished computation of majority classes and gapcounts")
+    LOG.info("Successfully wrote consensus array")
+    LOG.info("Writing consensus array in textfiles")
     with open('data/sequence.fasta', 'w') as f:
         f.write('>sequence\n')
         for x in consensus_array:
@@ -46,7 +46,7 @@ def write_consensus_sequence(msa_content, threshold):
             line = "Pos."+str(i)+": "+str(x)+'\n'
             f.write(line)
             i += 1
-    LOG.info("End writing files")
+    LOG.info("Successfully wrote consensusarray") # tell where it's been written to!
 
     return consensus_array
 
