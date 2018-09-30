@@ -11,14 +11,14 @@ LOG.setLevel(logging.INFO)
 
 
 def write_consensus_sequence(msa_content, threshold):
-    LOG.info("Writing consensus array")
+    LOG.info("Start writing consensus array")
     consensus_array = []
     LOG.info("Compute majority classes and gapcounts")
     for section in msa_content:
         section = parse_for_sequence_only(section)
-        for i in range(len(section[0])): #acidpos in line
+        for i in range(len(section[0])):  # acidpos in line
             aminoacids_at_position = []
-            for j in range(len(section)): #line
+            for j in range(len(section)):  # line
                 if j == 0:
                     if section[j][i] != '-':
                         aminoacids_at_position.append(section[j][i])
@@ -30,23 +30,7 @@ def write_consensus_sequence(msa_content, threshold):
                 major_class, gapcount = compute_majorities(aminoacids_at_position, threshold)
                 consensus_array.append([aminoacids_at_position[0], major_class, gapcount])
 
-    LOG.info("Successfully finished computation of majority classes and gapcounts")
-    LOG.info("Successfully wrote consensus array")
-    LOG.info("Writing consensus array in textfiles")
-    with open('data/sequence.fasta', 'w') as f:
-        f.write('>sequence\n')
-        for x in consensus_array:
-            f.write(str(x[0]))
-    with open('data/consensus_array.txt', 'w') as f:
-        f.write('\n'.join(str(x) for x in consensus_array))
-    with open('data/consensus_array_titled.txt', 'w') as f:
-        i = 1
-        f.write("MSA-CONSENSUS-ARRAY using a "+str(int(threshold*100))+"%-threshold\n\n")
-        for x in consensus_array:
-            line = "Pos."+str(i)+": "+str(x)+'\n'
-            f.write(line)
-            i += 1
-    LOG.info("Successfully wrote consensusarray") # tell where it's been written to!
+    LOG.info("Finish computation for majority classes and gapcounts")
 
     return consensus_array
 
