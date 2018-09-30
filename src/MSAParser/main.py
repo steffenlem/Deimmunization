@@ -1,9 +1,7 @@
-import click
 import logging
-import sys
 
-from Deimmunization.MSAParser.io.parser.msa_parser import parse_and_setup_info
-from Deimmunization.MSAParser.io.writer.write_consensus_array import write_consensus_sequence
+from src.MSAParser.io.parser.msa_parser import parse_and_setup_info
+from src.MSAParser.io.writer.write_consensus_array import write_consensus_sequence
 
 console = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
