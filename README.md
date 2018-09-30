@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Zethson/PythonProjectTemplate.svg?branch=master)](https://travis-ci.org/Zethson/PythonProjectTemplate)
+[![Build Status](https://travis-ci.org/steffenlem/Deimmunization.svg?branch=master)](https://travis-ci.org/steffenlem/Deimmunization)
 [![codecov](https://codecov.io/gh/Zethson/PythonProjectTemplate/branch/master/graph/badge.svg)](https://codecov.io/gh/Zethson/PythonProjectTemplate)
 
 # Title
