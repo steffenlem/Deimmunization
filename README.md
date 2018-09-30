@@ -27,7 +27,7 @@ MIT
 
 Authors
 =====
-Lukas Heumos
-Steffen Lemke
+Lukas Heumos    
+Steffen Lemke    
 Alexander Röhl
 
