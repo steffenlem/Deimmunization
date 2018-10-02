@@ -2,7 +2,9 @@
 [![codecov](https://codecov.io/gh/steffenlem/Deimmunization/branch/master/graph/badge.svg)](https://codecov.io/gh/steffenlem/Deimmunization)
 
 # Title
-Explanation 
+
+Software project of the iGEM Team Tübingen 2018
+Detection and removal of immune epitopes in proteins
 
 Quick Setup for developers
 =====
