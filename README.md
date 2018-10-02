@@ -3,7 +3,7 @@
 
 # Title
 
-Software project of the iGEM Team Tübingen 2018
+Software project of the iGEM Team Tübingen 2018    
 Detection and removal of immune epitopes in proteins
 
 Quick Setup for developers
@@ -29,7 +29,7 @@ MIT
 
 Authors
 =====
-Lukas Heumos
-Steffen Lemke
+Lukas Heumos    
+Steffen Lemke    
 Alexander Röhl
 
