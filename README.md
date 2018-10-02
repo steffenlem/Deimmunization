@@ -14,6 +14,13 @@ Quick Setup for developers
 
 Usage
 =====
+ <code>
+  deimmunization
+  test
+  
+ </code>
+
+
 ## The CLI - Command Line Interface
 ```bash
 > deimmunization
