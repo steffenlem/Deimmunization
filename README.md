@@ -43,7 +43,7 @@ Examples
 
 License
 =====
-MIT
+Our tool is made available under the [MIT License](http://www.opensource.org/licenses/mit-license.php).
 
 Authors
 =====
