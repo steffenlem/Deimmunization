@@ -15,8 +15,11 @@ Quick Setup for developers
 Usage
 =====
  <code>
-  deimmunization\
-  test
+ deimmunization \
+ test \ 
+ test  
+ test\
+ test\ 
   
  </code>
 
