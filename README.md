@@ -22,14 +22,14 @@ Usage
 $ deimmunization --help
 
 Options:
-  -in, --input_msa TEXT           file path to msa.txt  [required]
-  -rs, --reference_sequence TEXT  titlestring of reference sequence
+  -in, --input_msa <arg>           file path to msa.txt  [required]
+  -rs, --reference_sequence <arg>  titlestring of reference sequence
                                   [required]
-  -t, --majority_threshold FLOAT  value between 0 and 1 to decide the
+  -t, --majority_threshold <val>  value between 0 and 1 to decide the
                                   consensus value  [required]
-  -a, --mhc_alle TEXT             MHC class II allel e.g. DRB1_0101
+  -a, --mhc_alle <arg>             MHC class II allel e.g. DRB1_0101
                                   [required]
-  -p, --mhc_ii_pan TEXT           path to netMHCIIpan  [required]
+  -p, --mhc_ii_pan <arg>           path to netMHCIIpan  [required]
   --help                          Show this message and exit.
 
 ```
