@@ -16,6 +16,8 @@ Quick Setup for developers
 Usage
 =====
 
+## The CLI - Command Line Interface
+
 ```
 $ deimmunization --help
 
@@ -32,10 +34,6 @@ Options:
 
 ```
 
-## The CLI - Command Line Interface
-```bash
-$ deimmunization
-```
 
 Examples
 =====
