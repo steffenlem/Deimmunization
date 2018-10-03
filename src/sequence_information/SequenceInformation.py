@@ -4,11 +4,12 @@ class SequenceInformation:
         - sequence:             protein sequence as 'char' array
         - msa:                  Multiple Sequence Alignment (MSA), as described in the MSA class
         - epitope_prediction:   epitope prediction data - array of prediction data for single allele
-        - effect_of_mutation:   
+        - effect_of_mutation:
     """
     sequence = []
     msa = []
     epitope_prediction = []
+    base_immunogenicity = 0
     effect_of_mutation = []
 
     def __init__(self, sequence, msa):
@@ -101,10 +102,26 @@ class SequenceInformation:
         for x in self.epitope_prediction:
             for y in x:
                 immunogenicity += 1
-        return immunogenicity
+        self.base_immunogenicity = immunogenicity
+
+    def append_effect_of_mutation(self, amino_acid, index, immunogenicity, ddG):
+        """
+        Adds array containing this function's parameters information to the effect_of_mutation array
+        :param amino_acid: amino acid after muation
+        :param index:  index of muation in the sequence
+        :param immunogenicity: value for immunogenicity
+        :param ddG: value for free folding energy
+        :return: void
+        """
+        self.effect_of_mutation.append([amino_acid, index, immunogenicity, ddG])
+
+    def get_effect_of_mutation(self):
+        """
+        Getter for effect_of_mutation array
+        :return: the array
+        """
+        return self.effect_of_mutation
 
     # TODO Update MHC prediction around index
 
-    # TODO muate sequence and save the position (constraints...)
-
-    # TODO immunogenicity calculation for each individual allel and for all allels combinded
+    # TODO mutate sequence and save the position (constraints...)
