@@ -1,15 +1,20 @@
 class SequenceInformation:
-    """ Sequence Information class contains:
-    protein sequence as 'char' array
-    Multiple Sequence Alignment (MSA), as described in the MSA class
-    Epitope_prediction data
+    """
+    Sequence Information class contains:
+        - sequence:             protein sequence as 'char' array
+        - msa:                  Multiple Sequence Alignment (MSA), as described in the MSA class
+        - epitope_prediction:   epitope prediction data - array of prediction data for single allele
+        - effect_of_mutation:   
     """
     sequence = []
     msa = []
     epitope_prediction = []
+    effect_of_mutation = []
 
     def __init__(self, sequence, msa):
-        """Constructor"""
+        """
+        Constructor
+        """
         self.sequence = sequence
         self.msa = msa
 
@@ -22,7 +27,10 @@ class SequenceInformation:
         self.epitope_prediction.append(prediction)
 
     def get_sequence(self):
-        """Getter for sequence information. Returns Char array of the sequence"""
+        """
+        Getter for sequence information
+        :return: Char array of the sequence
+        """
         return self.sequence
 
     def get_sequence_pos(self, index):
@@ -82,6 +90,18 @@ class SequenceInformation:
             f.write('>sequence\n')
             for x in seq:
                 f.write(str(x))
+
+    def calculate_base_immunogenicity(self):
+        """
+        Calculation of the immunogenicity of the protein without any point mutations
+        :return: immunogenicity (number of immune epitopes)
+        """
+        immunogenicity = 0
+        # counts the number of epitopes found by NetMHCIIpan and sums them up
+        for x in self.epitope_prediction:
+            for y in x:
+                immunogenicity += 1
+        return immunogenicity
 
     # TODO Update MHC prediction around index
 
