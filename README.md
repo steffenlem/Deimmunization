@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/steffenlem/Deimmunization.svg?branch=master)](https://travis-ci.org/steffenlem/Deimmunization)
 [![codecov](https://codecov.io/gh/steffenlem/Deimmunization/branch/master/graph/badge.svg)](https://codecov.io/gh/steffenlem/Deimmunization)
 
-# Title
+# Deimmunization Tool iGEM Team Tübingen
 
 Software project of the iGEM Team Tübingen 2018    
 Detection and removal of immune epitopes in proteins
@@ -34,7 +34,7 @@ Options:
 
 ## The CLI - Command Line Interface
 ```bash
-> deimmunization
+$ deimmunization
 ```
 
 Examples
