@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 import click
@@ -18,7 +17,8 @@ LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 
 
-# python3 Deimmunization.py -in /home/steffen/Documents/Deimmunization/data/clustalo-I20180923-185956-0934-78103081-p2m.clustal_num.txt -rs BoNTC -t 0.5 -a DRB1_0301 -p /home/steffen/netMHCIIpan-3.2/netMHCIIpan
+# deimmunization -in /home/steffen/Documents/Deimmunization/data/clustalo-I20180923-185956-0934-78103081-p2m.clustal_num.txt -rs BoNTC -t 0.5 -a DRB1_0701 -p /home/steffen/netMHCIIpan-3.2/netMHCIIpan
+
 
 @click.command()
 @click.option('-in', '--input_msa', prompt='input msa',
@@ -27,22 +27,22 @@ LOG.setLevel(logging.INFO)
               help='titlestring of reference sequence', required=True)
 @click.option('-t', '--majority_threshold', prompt='majority threshold',
               help='value between 0 and 1 to decide the consensus value', required=True, default=0.5)
-@click.option('-a', '--mhc_alle', prompt='mhc_alles',
+@click.option('-a', '--mhc_allele', prompt='MHC allele',
               help='MHC class II allel e.g. DRB1_0101', required=True)
 @click.option('-p', '--mhc_ii_pan', prompt='MHCIIpan',
-              help='path to MHCIIpan', required=True)
-def main(input_msa, reference_sequence, majority_threshold, mhc_alle, mhc_ii_pan):
-    start_time = time.time()
-
+              help='path to netMHCIIpan', required=True)
+def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_pan):
+    # Construct an MSA Object, which contains the information about the MSA
     my_msa = MSA(input_msa, reference_sequence, majority_threshold)
 
-    parsed_data = parse_netMHCIIpan('/home/steffen/netMHCIIpan-3.2/netMHCIIpan', 'data/2wcv.fasta', 'DRB1_0301')
+    # Predict the Epitopes using netMHCIIpan and parse the output of netMHCIIpan to
+    parsed_data = parse_netMHCIIpan(mhc_ii_pan, 'data/2wcv.fasta', mhc_allele)
 
     # Information about the sequenece (eptitopes, msa, ...) is bundled
 
     sequence_info = SequenceInformation(my_msa.get_sequence(), my_msa.get_consensus_sequence())
 
-    sequence_info.set_allel_prediction(parsed_data)
+    sequence_info.set_allele_prediction(parsed_data)
 
     sequence_info.get_neighbour_chunk(1282)
 
@@ -56,11 +56,6 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alle, mhc_ii_pan
         for z in range(9):
             number_epitopes[int(x[3]) - 1 + z] = number_epitopes[int(x[3]) - 1 + z] + 1
 
-    # Time
-    print()
-    print(time.time() - start_time, "seconds")
-
-    print(parsed_data)
 
     # Plot Binding Cores
     plt.plot(number_epitopes)
