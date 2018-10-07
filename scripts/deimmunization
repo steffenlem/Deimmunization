@@ -17,7 +17,8 @@ LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 
 
-# deimmunization -in /home/steffen/Documents/Deimmunization/data/clustalo-I20180923-185956-0934-78103081-p2m.clustal_num.txt -rs BoNTC -t 0.5 -a DRB1_0701 -p /home/steffen/netMHCIIpan-3.2/netMHCIIpan
+# pyhton
+# deimmunization -in /home/steffen/Documents/Deimmunization30092018/Deimmunization/data/Isomerase_90_similarity.clustal_num -rs 2WCV_Paris -t 0.5 -a DRB1_0301 -p /home/steffen/netMHCIIpan-3.2/netMHCIIpan
 
 
 @click.command()
@@ -34,9 +35,16 @@ LOG.setLevel(logging.INFO)
 def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_pan):
     # Construct an MSA Object, which contains the information about the MSA
     my_msa = MSA(input_msa, reference_sequence, majority_threshold)
+    my_msa.write_sequnce('data/ref_sequence.fasta')
+
+
+    print(my_msa.get_consensus_sequence())
+
+
 
     # Predict the Epitopes using netMHCIIpan and parse the output of netMHCIIpan to
-    parsed_data = parse_netMHCIIpan(mhc_ii_pan, 'data/2wcv.fasta', mhc_allele)
+    parsed_data = parse_netMHCIIpan(mhc_ii_pan, 'data/ref_sequence.fasta', mhc_allele)
+    print(parsed_data)
 
     # Information about the sequenece (eptitopes, msa, ...) is bundled
 
@@ -44,16 +52,33 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_p
 
     sequence_info.set_allele_prediction(parsed_data)
 
-    print('Number of epitopes: ' + str(sequence_info.calculate_base_immunogenicity()))
-
-    sequence_info.get_neighbour_chunk(1282)
+    sequence_info.calculate_base_immunogenicity()
+    print('Number of epitopes: ' + str(sequence_info.base_immunogenicity))
 
     print(len(sequence_info.get_sequence()))
+
+
+    print('')
+    a = []
+    sequence_info.find_best_mutation(1, 3, a, 3, mhc_ii_pan, mhc_allele)
+
+    #sequence_info.find_best_mutation(3,[],100, mhc_ii_pan)
+
+
+
+
+    #sequence_info.write_sequence('data/temp1.fasta')
+
+
+
+
+    """
+
 
     # TODO Transfer to separate module/class###
     # Simple Visualization of Epitopes and binding cores
     # TODO Integration of other allels
-    number_epitopes = np.zeros(int(parsed_data[-1][0]) + 15)
+    #number_epitopes = np.zeros(int(parsed_data[-1][0]) + 15)
     for x in parsed_data:
         for z in range(9):
             number_epitopes[int(x[3]) - 1 + z] = number_epitopes[int(x[3]) - 1 + z] + 1
@@ -61,7 +86,7 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_p
     # Plot Binding Cores
     plt.plot(number_epitopes)
     plt.show()
-
+    """
 
 if __name__ == '__main__':
     main()

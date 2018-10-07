@@ -3,7 +3,7 @@ import logging
 console = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
-LOG = logging.getLogger("MSA Parser")
+LOG = logging.getLogger("File parser")
 LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 
@@ -13,8 +13,10 @@ def parse_and_setup_info(inputfile, reference_sequence):
     with open(inputfile) as text:
         msa = []
         for line in text:
-            msa.append(line)
-    content = remove_non_sequences(msa)
+            if not (len(line.replace('.', '').strip()) == 0):
+                msa.append(line)
+    content = remove_title(msa)
+    content = remove_non_sequences(content)
     content = reduce_space(remove_newline(content))
 
     LOG.info("Start Grouping Content")
@@ -54,6 +56,6 @@ def remove_title(stringlist):
 def remove_non_sequences(stringlist):
     newstringlist = []
     for i in stringlist:
-        if not(':' in i or '.' in i or '*' in i):
+        if not(':' in i or '*' in i):
             newstringlist.append(i)
     return newstringlist
