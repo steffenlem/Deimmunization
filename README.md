@@ -45,7 +45,5 @@ Our tool is made available under the [MIT License](http://www.opensource.org/lic
 
 Authors
 =====
-Lukas Heumos        
-Steffen Lemke        
-Alexander Röhl
+The iGEM Team Tübingen drylab developers
 
