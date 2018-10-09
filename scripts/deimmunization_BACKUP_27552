@@ -1,0 +1,204 @@
+#!/usr/bin/env python
+
+import numpy as np
+import matplotlib.pyplot as plt
+import click
+import logging
+
+from src.MSAParser.model.MSA import MSA
+from src.netMHCIIpanParser.netMHCIIparser import parse_netMHCIIpan
+from src.sequence_information.SequenceInformation import SequenceInformation
+<<<<<<< HEAD
+from src.mutationRules.mutationRules import mutation_order_by_group
+from src.PointMutation.PointMutation import PointMutation
+=======
+from src.PDB_Parser_Encoder.ddG_trainings_data_main import write_test_data_for_ddg_regression
+from src.PDB_Parser_Encoder.main import parse_and_encode_pdb
+from src.PDB_Parser_Encoder.add_point_mutation import do_and_return_pointmutation
+from src.PDB_Parser_Encoder.add_point_mutation import three_list_to_string
+>>>>>>> 97bbb477ff82205126e90fd048dd047dfd44a979
+
+console = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console.setFormatter(formatter)
+LOG = logging.getLogger("Commandline parser")
+LOG.addHandler(console)
+LOG.setLevel(logging.INFO)
+
+
+# sudo python3 setup.py install
+# deimmunization -in /home/steffen/Documents/Deimmunization/data/Isomerase_90_similarity.clustal_num -rs 2WCV_Paris -t 0.5 -a DRB1_0301,DRB1_0701,DRB1_1501 -p /home/steffen/netMHCIIpan-3.2/netMHCIIpan
+
+
+@click.command()
+@click.option('-in', '--input_msa', prompt='input msa',
+              help='file path to msa.txt', required=True)
+@click.option('-rs', '--reference_sequence', prompt='reference sequence',
+              help='titlestring of reference sequence', required=True)
+@click.option('-t', '--majority_threshold', prompt='majority threshold',
+              help='value between 0 and 1 to decide the consensus value', required=True, default=0.5)
+@click.option('-a', '--mhc_alleles', prompt='MHC alleles',
+              help='Input the MHC allele in the following form:\n MHC-I: e.g. XXX-000 \n'
+                   'MHC-II: e.g. DRB1_0101\n'
+                   'It is also possible (and recommended) to choose multiple alleles. The alleles '
+                   'have to be comma separated. \ne.g.; DRB1_0101, DRB1_0202, DRB1_0303, ...', required=True)
+@click.option('-mp', '--mhc_ii_pan', prompt='MHCIIpan',
+              help='path to netMHCIIpan', required=True)
+<<<<<<< HEAD
+@click.option('-mt', '--number_mutations', prompt='Number of mutations',
+              help='the number of mutation which should be introduced in the sequence', required=True)
+@click.option('-pos', '--pos_to_check', prompt='Positions to check:',
+              help='the number of positions to check to introduce a mutation in each iteration', required=True)
+
+# TODO implement additional option for positions to avoid in the muatation process
+def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_pan):
+    # Split MHC-alleles
+    mhc_alleles = [c.strip() for c in mhc_alleles.split(',')]
+    print(mhc_alleles)
+=======
+@click.option('-pdb', '--pdb_file', prompt='pdb file',
+              help='path to pdb file', required=True)
+def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_pan, pdb_file):
+    # Write data for ddG-regression
+    # write_test_data_for_ddg_regression()
+
+    # Read contact informations from pdb-file
+    encoded_pdb_informations = parse_and_encode_pdb(pdb_file, 7)
+    # for i in encoded_pdb_informations:
+    #     print(i)
+    #
+    # # Example for adding pointmutations to contact informations
+    # mutations = []
+    # a_mutation = do_and_return_pointmutation(encoded_pdb_informations, 1, 'A', 'ALA')
+    # mutations.append(a_mutation)
+    # print(a_mutation)
+    # b_mutation = do_and_return_pointmutation(encoded_pdb_informations, 2, 'A', 'R')
+    # mutations.append(b_mutation)
+    # print(b_mutation)
+    # print(three_list_to_string(mutations))
+>>>>>>> 97bbb477ff82205126e90fd048dd047dfd44a979
+
+    # Construct an MSA Object, which contains the information about the MSA
+    my_msa = MSA(input_msa, reference_sequence, majority_threshold)
+    my_msa.write_sequnce('data/ref_sequence.fasta')
+
+    # Information about the sequenece (eptitopes, msa, ...) is bundled
+    target_sequence = SequenceInformation(my_msa.get_sequence(), my_msa.get_consensus_sequence())
+
+    # Predict the Epitopes using netMHCIIpan and parse the output of netMHCIIpan to
+    for x in mhc_alleles:
+        parsed_data = parse_netMHCIIpan(mhc_ii_pan, 'data/ref_sequence.fasta', x)
+        target_sequence.set_allele_prediction(parsed_data)
+
+    target_sequence.calculate_base_immunogenicity()
+    target_sequence.calculate_binding_core()
+    target_sequence.make_queue_mutation()
+
+    # Settings for the deimmunization
+    number_mutations = 2
+    positions_to_check = 2
+
+    # variables
+    inital_immunigenicity = target_sequence.base_immunogenicity
+    final_mutations = []
+    queue = target_sequence.queue
+
+    print('Base:' + str(target_sequence.base_immunogenicity))
+
+    # Loop deimmunization
+    while number_mutations > len(final_mutations):
+        # create temporary sequence class
+        temp_sequence = SequenceInformation(my_msa.get_sequence(), my_msa.get_consensus_sequence())
+        temp_sequence.introduce_mutations(final_mutations)
+
+        # write sequence to file for netMHCIIpan
+        temp_sequence.write_sequence('data/temp.fasta')
+
+        # make prediction for all alleles
+        for x in mhc_alleles:
+            parsed_data = parse_netMHCIIpan(mhc_ii_pan, 'data/temp.fasta', x)
+            temp_sequence.set_allele_prediction(parsed_data)
+
+        # calculate temp values
+        temp_sequence.calculate_base_immunogenicity()
+        temp_sequence.calculate_binding_core()
+        temp_sequence.make_queue_mutation()
+
+        # Update queue
+        queue = temp_sequence.queue
+
+        # Remove already edited residues from queue
+        for point_mutation in final_mutations:
+            try:
+                queue.remove(point_mutation.index)
+            except ValueError:
+                pass
+
+        # Update immunogenicity
+        current_immunogenicity = temp_sequence.base_immunogenicity
+
+        # Indroduced muations
+        current_mutations = []
+
+        for x in range(positions_to_check):
+            # index of residue to mutate
+            position = queue[x]
+
+            current_residue = temp_sequence.get_sequence_pos(position)
+            current_amino_group = temp_sequence.msa[position][1]
+
+            print(current_residue)
+            print(current_immunogenicity)
+            print(current_amino_group)
+
+            # List of amino acids to check  # TODO braucht man eigentlich gar nicht wenn man eh alle testet...
+            mutations_to_check = mutation_order_by_group[current_amino_group].copy()
+            mutations_to_check.remove(current_residue)
+
+            for aa in mutations_to_check:
+                current_mutations.append(
+                    PointMutation(aa, position, temp_sequence.update_immunogenicity(aa, position, mhc_ii_pan), 0))
+        final_mutations.append(decision_function(current_mutations))
+
+    # Print final mutations
+    for x in final_mutations:
+        print(x.__str__())
+
+    # create new sequence
+    new_sequence = SequenceInformation(my_msa.get_sequence(), my_msa.get_consensus_sequence())
+    new_sequence.introduce_mutations(final_mutations)
+    new_sequence.write_sequence('data/new_sequence.fasta')
+
+    # make prediction for all alleles
+    for x in mhc_alleles:
+        prediction_data = parse_netMHCIIpan(mhc_ii_pan, 'data/new_sequence.fasta', x)
+        new_sequence.set_allele_prediction(prediction_data)
+
+    new_sequence.calculate_base_immunogenicity()
+    new_sequence.calculate_binding_core()
+
+    print('Base:' + str(new_sequence.base_immunogenicity))
+
+    # plot epitopes
+    plot_epitopes(target_sequence.get_length_sequence(), target_sequence.part_of_core_pos)
+    plot_epitopes(new_sequence.get_length_sequence(), new_sequence.part_of_core_pos)
+
+
+def decision_function(mutations):
+    best_mutation = PointMutation('', -1, float('inf'), float('-inf'))
+    for x in mutations:
+        if x.immunogenicity < best_mutation.immunogenicity:
+            best_mutation = x
+    return best_mutation
+
+
+def plot_epitopes(length_sequence, epitopes):
+    plottable_data = np.zeros(int(length_sequence))
+    for x in epitopes:
+        plottable_data[x[0]] = x[1]
+    plt.plot(plottable_data)
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+import numpy as np
+import matplotlib.pyplot as plt
+import click
+import logging
+
+from src.MSAParser.model.MSA import MSA
+from src.netMHCIIpanParser.netMHCIIparser import parse_netMHCIIpan
+from src.sequence_information.SequenceInformation import SequenceInformation
+from src.PDB_Parser_Encoder.ddG_trainings_data_main import write_test_data_for_ddg_regression
+from src.PDB_Parser_Encoder.main import parse_and_encode_pdb
+from src.PDB_Parser_Encoder.add_point_mutation import do_and_return_pointmutation
+from src.PDB_Parser_Encoder.add_point_mutation import three_list_to_string
+
+console = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console.setFormatter(formatter)
+LOG = logging.getLogger("Commandline parser")
+LOG.addHandler(console)
+LOG.setLevel(logging.INFO)
+
+
+# pyhton
+# deimmunization -in /home/steffen/Documents/Deimmunization30092018/Deimmunization/data/Isomerase_90_similarity.clustal_num -rs 2WCV_Paris -t 0.5 -a DRB1_0301 -p /home/steffen/netMHCIIpan-3.2/netMHCIIpan
+
+
+@click.command()
+@click.option('-in', '--input_msa', prompt='input msa',
+              help='file path to msa.txt', required=True)
+@click.option('-rs', '--reference_sequence', prompt='reference sequence',
+              help='titlestring of reference sequence', required=True)
+@click.option('-t', '--majority_threshold', prompt='majority threshold',
+              help='value between 0 and 1 to decide the consensus value', required=True, default=0.5)
+@click.option('-a', '--mhc_allele', prompt='MHC allele',
+              help='MHC class II allel e.g. DRB1_0101', required=True)
+@click.option('-p', '--mhc_ii_pan', prompt='MHCIIpan',
+              help='path to netMHCIIpan', required=True)
+@click.option('-pdb', '--pdb_file', prompt='pdb file',
+              help='path to pdb file', required=True)
+def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_pan, pdb_file):
+    # Write data for ddG-regression
+    # write_test_data_for_ddg_regression()
+
+    # Read contact informations from pdb-file
+    encoded_pdb_informations = parse_and_encode_pdb(pdb_file, 7)
+    # for i in encoded_pdb_informations:
+    #     print(i)
+    #
+    # # Example for adding pointmutations to contact informations
+    # mutations = []
+    # a_mutation = do_and_return_pointmutation(encoded_pdb_informations, 1, 'A', 'ALA')
+    # mutations.append(a_mutation)
+    # print(a_mutation)
+    # b_mutation = do_and_return_pointmutation(encoded_pdb_informations, 2, 'A', 'R')
+    # mutations.append(b_mutation)
+    # print(b_mutation)
+    # print(three_list_to_string(mutations))
+
+    # Construct an MSA Object, which contains the information about the MSA
+    my_msa = MSA(input_msa, reference_sequence, majority_threshold)
+    my_msa.write_sequnce('data/ref_sequence.fasta')
+
+
+    print(my_msa.get_consensus_sequence())
+
+
+
+    # Predict the Epitopes using netMHCIIpan and parse the output of netMHCIIpan to
+    parsed_data = parse_netMHCIIpan(mhc_ii_pan, 'data/ref_sequence.fasta', mhc_allele)
+    print(parsed_data)
+
+    # Information about the sequenece (eptitopes, msa, ...) is bundled
+
+    sequence_info = SequenceInformation(my_msa.get_sequence(), my_msa.get_consensus_sequence())
+
+    sequence_info.set_allele_prediction(parsed_data)
+
+    sequence_info.calculate_base_immunogenicity()
+    print('Number of epitopes: ' + str(sequence_info.base_immunogenicity))
+
+    print(len(sequence_info.get_sequence()))
+
+
+    print('')
+    a = []
+    sequence_info.find_best_mutation(1, 3, a, 3, mhc_ii_pan, mhc_allele)
+
+    #sequence_info.find_best_mutation(3,[],100, mhc_ii_pan)
+
+
+
+
+    #sequence_info.write_sequence('data/temp1.fasta')
+
+
+
+
+    """
+
+
+    # TODO Transfer to separate module/class###
+    # Simple Visualization of Epitopes and binding cores
+    # TODO Integration of other allels
+    #number_epitopes = np.zeros(int(parsed_data[-1][0]) + 15)
+    for x in parsed_data:
+        for z in range(9):
+            number_epitopes[int(x[3]) - 1 + z] = number_epitopes[int(x[3]) - 1 + z] + 1
+
+    # Plot Binding Cores
+    plt.plot(number_epitopes)
+    plt.show()
+    """
+
+if __name__ == '__main__':
+    main()
