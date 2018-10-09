@@ -16,6 +16,8 @@ class SequenceInformation:
     epitope_prediction = []
     base_immunogenicity = 0
     effect_of_mutation = []
+    part_of_core_pos = []
+    queue = []
 
     def __init__(self, sequence, msa):
         """
@@ -26,6 +28,8 @@ class SequenceInformation:
         self.epitope_prediction = []
         self.base_immunogenicity = 0
         self.effect_of_mutation = []
+        self.part_of_core_pos = {}
+        self.queue = []
 
     def set_allele_prediction(self, prediction):
         """
@@ -79,7 +83,6 @@ class SequenceInformation:
         :return: the MSA
         """
         return self.msa
-
 
     def base_immunogenicity(self):
         """
@@ -185,8 +188,6 @@ class SequenceInformation:
 
             new_imm += len(parse_netMHCIIpan(mhc_pan_path, 'data/temp.fasta', allele[0][1]))
 
-        #print('Immunigenicity:' + str(immunogenicity + new_imm))
-
         return immunogenicity + new_imm
 
     def find_best_mutation(self, current_depth, max_depth, mutated_pos, iterations, mhc_pan_path, mhc_allele):
@@ -217,13 +218,9 @@ class SequenceInformation:
             # effect_of_mutation (class variable) stores all random possible changes
             self.append_effect_of_mutation(random_aa, random_pos, temp_immunogenicity, 0)
 
-
         # sort the array effect_of_mutations using the immnogenicity as key
         # after sorting the array starts with the smallest values for the immnogenicity
         self.effect_of_mutation.sort(key=lambda y: y[2])
-        print()
-        print(self.effect_of_mutation)
-        print('Depth: ' + str(current_depth))
 
         # If the final depth is not reached
         if current_depth < max_depth:
@@ -240,7 +237,7 @@ class SequenceInformation:
                 # copy the sequence
                 mutated_sequence = self.get_sequence().copy()
 
-                #introduce the point mutataion of 'the effect' variable in 'mutated_sequence'
+                # introduce the point mutataion of 'the effect' variable in 'mutated_sequence'
                 mutated_sequence[effect[1]] = effect[0]
 
                 # Create new instance of the class
@@ -261,7 +258,9 @@ class SequenceInformation:
                 temp_mutated_pos = mutated_pos.copy()
                 temp_mutated_pos.append(effect)
 
-                best_mutations.append(temp_seq.find_best_mutation((current_depth + 1), max_depth, temp_mutated_pos, iterations, mhc_pan_path, mhc_allele))
+                best_mutations.append(
+                    temp_seq.find_best_mutation((current_depth + 1), max_depth, temp_mutated_pos, iterations,
+                                                mhc_pan_path, mhc_allele))
             mutated_pos = self.decision_function(best_mutations)
             print(mutated_pos)
             return mutated_pos
@@ -278,5 +277,62 @@ class SequenceInformation:
         :return:
         """
         best_mutations.sort(key=lambda y: y[-1][2])
-        #sorted(best_mutations, key=lambda y: y[2]) # TODO Sort nicht sorted
+        # sorted(best_mutations, key=lambda y: y[2]) # TODO Sort nicht sorted
         return best_mutations[0]
+
+    def find_best_mutations_v2(self, current_depth, max_depth, mutated_pos, iterations, mhc_pan_path, mhc_allele):
+        return -1
+
+    def determine_mutable_positions(self):
+        """
+        Determines all position which are allowed to be mutated
+        :return: [index, 'group']
+        """
+        mutable_pos = []
+        one_letter_code = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y',
+                           'V', 'H']
+        for x in range(len(self.msa)):
+            """
+            Only true if:
+            the majority is not a single amino acids,but a class of amino acids
+            The amino acid is not Glycine or Proline
+            """
+            if self.msa[x][1] not in one_letter_code and self.msa[x][0] not in ['G', 'P']:
+                mutable_pos.append([x, self.msa[x][1]])
+        return mutable_pos
+
+    def calculate_binding_core(self):
+        """
+        Calculates number of epitope binding cores the amino acids are part of
+        :return: [index of start of core, number of cores]
+        """
+        calc_epitope = {}
+        for allele in self.epitope_prediction:
+            for x in allele:
+                for z in range(9):
+
+                    if x[3] - 1 + z in calc_epitope:
+                        calc_epitope[x[3] - 1 + z] = calc_epitope[x[3] - 1 + z] + 1
+                    else:
+                        calc_epitope[x[3] - 1 + z] = 1
+        self.part_of_core_pos = [[key, value] for key, value in calc_epitope.items()]
+        self.part_of_core_pos.sort(key=lambda y: y[1], reverse=True) # TODO 'best position'...
+
+    def make_queue_mutation(self):
+        """
+        Creates a queue for sequences to be mutated
+        :return: void
+        """
+        mutatbale_pos = [x[0] for x in self.determine_mutable_positions()]
+        for x in self.part_of_core_pos:
+            if x[0] in mutatbale_pos:
+                self.queue.append(x[0])
+
+    def introduce_mutations(self, mutations):
+        if mutations is None:
+            pass
+        else:
+            for x in mutations:
+                self.set_sequence_pos(x.amino_acid, x.index)
+
+
