@@ -49,10 +49,10 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_p
     #
     # # Example for adding pointmutations to contact informations
     # mutations = []
-    # a_mutation = do_and_return_pointmutation(encoded_pdb_informations, 156, 'ALA')
+    # a_mutation = do_and_return_pointmutation(encoded_pdb_informations, 1, 'A', 'ALA')
     # mutations.append(a_mutation)
     # print(a_mutation)
-    # b_mutation = do_and_return_pointmutation(encoded_pdb_informations, 155, 'R')
+    # b_mutation = do_and_return_pointmutation(encoded_pdb_informations, 2, 'A', 'R')
     # mutations.append(b_mutation)
     # print(b_mutation)
     # print(three_list_to_string(mutations))
