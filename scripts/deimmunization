@@ -8,6 +8,10 @@ import logging
 from src.MSAParser.model.MSA import MSA
 from src.netMHCIIpanParser.netMHCIIparser import parse_netMHCIIpan
 from src.sequence_information.SequenceInformation import SequenceInformation
+from src.PDB_Parser_Encoder.ddG_trainings_data_main import write_test_data_for_ddg_regression
+from src.PDB_Parser_Encoder.main import parse_and_encode_pdb
+from src.PDB_Parser_Encoder.add_point_mutation import do_and_return_pointmutation
+from src.PDB_Parser_Encoder.add_point_mutation import three_list_to_string
 
 console = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -32,7 +36,27 @@ LOG.setLevel(logging.INFO)
               help='MHC class II allel e.g. DRB1_0101', required=True)
 @click.option('-p', '--mhc_ii_pan', prompt='MHCIIpan',
               help='path to netMHCIIpan', required=True)
-def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_pan):
+@click.option('-pdb', '--pdb_file', prompt='pdb file',
+              help='path to pdb file', required=True)
+def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_pan, pdb_file):
+    # Write data for ddG-regression
+    # write_test_data_for_ddg_regression()
+
+    # Read contact informations from pdb-file
+    encoded_pdb_informations = parse_and_encode_pdb(pdb_file, 7)
+    # for i in encoded_pdb_informations:
+    #     print(i)
+    #
+    # # Example for adding pointmutations to contact informations
+    # mutations = []
+    # a_mutation = do_and_return_pointmutation(encoded_pdb_informations, 1, 'A', 'ALA')
+    # mutations.append(a_mutation)
+    # print(a_mutation)
+    # b_mutation = do_and_return_pointmutation(encoded_pdb_informations, 2, 'A', 'R')
+    # mutations.append(b_mutation)
+    # print(b_mutation)
+    # print(three_list_to_string(mutations))
+
     # Construct an MSA Object, which contains the information about the MSA
     my_msa = MSA(input_msa, reference_sequence, majority_threshold)
     my_msa.write_sequnce('data/ref_sequence.fasta')
