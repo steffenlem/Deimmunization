@@ -1,18 +1,15 @@
 import math
 import numpy as np
-import warnings
 
-from Bio.PDB.PDBExceptions import PDBConstructionWarning
 from Bio.PDB.Selection import unfold_entities
 from src.PDB_Parser_Encoder.model.encoding import blopmap_encode_three_letter
 
 
 def get_contact_info(structure, path, chain, angstrom, residue_id):
-    warnings.simplefilter('ignore', PDBConstructionWarning)
     name = structure[0][chain][residue_id].get_resname()
     neighbourcount = neighbour_counter(structure[0], chain, residue_id, angstrom)
     secondary_struct = find_secondary_struct_of_residue(residue_id, path)
-    contact_info = [blopmap_encode_three_letter(name), [residue_id], [neighbourcount], secondary_struct, []]
+    contact_info = [blopmap_encode_three_letter(name), [residue_id, chain], [neighbourcount], secondary_struct, []]
     return contact_info
 
 

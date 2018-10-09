@@ -1,4 +1,7 @@
+import warnings
+
 from Bio.PDB import PDBParser
+from Bio.PDB.PDBExceptions import PDBConstructionWarning
 from src.PDB_Parser_Encoder.io.parser.ddG_trainings_dataset_parser import parser_dataset
 from src.PDB_Parser_Encoder.io.parser.parse_pdb import get_contact_info
 from src.PDB_Parser_Encoder.model.encoding import blopmap_encode_one_letter
@@ -6,6 +9,7 @@ from src.PDB_Parser_Encoder.io.writer.ddG_trainings_data_writer import write_ddG
 
 
 def write_test_data_for_ddg_regression():
+    warnings.simplefilter('ignore', PDBConstructionWarning)
     list = parser_dataset()
     angstroms = [7]  # 6, 8, 10, 12]
     for a in angstroms:
