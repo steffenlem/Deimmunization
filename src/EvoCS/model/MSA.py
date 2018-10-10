@@ -1,5 +1,5 @@
-from src.MSAParser.io.parser.msa_parser import parse_and_setup_info
-from src.MSAParser.io.writer.write_consensus_array import write_consensus_sequence
+from src.EvoCS.io.parser.msa_parser import parse_and_setup_info
+from src.EvoCS.io.writer.write_consensus_array import write_consensus_sequence
 
 
 class MSA:
