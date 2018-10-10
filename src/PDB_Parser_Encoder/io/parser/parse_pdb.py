@@ -6,8 +6,11 @@ from src.PDB_Parser_Encoder.model.encoding import blopmap_encode_three_letter
 
 
 def get_contact_info(structure, path, chain, angstrom, residue_id):
+    # Get name of residue
     name = structure[0][chain][residue_id].get_resname()
+    # Compute number of neighbours
     neighbourcount = neighbour_counter(structure[0], chain, residue_id, angstrom)
+    # Get secondary structure of residue
     secondary_struct = find_secondary_struct_of_residue(residue_id, path)
     contact_info = [blopmap_encode_three_letter(name), [residue_id, chain], [neighbourcount], secondary_struct, []]
     return contact_info
@@ -18,8 +21,10 @@ def neighbour_counter(structure, chain, residue_id, angstrom):
     for cha in structure:
         for res in cha:
             if not (res.id[1] in [residue_id - 1, residue_id, residue_id + 1]):
+                # Get atoms of sidechain
                 atoms_in_res = get_atoms_of_res_sidechain(res)
                 if len(atoms_in_res) != 0:
+                    # If distance between sidechains beneath angstrom threshold -> neighbourcount + 1
                     if compute_residue_distance(atoms_in_res,
                                                 get_atoms_of_res_sidechain(structure[chain][residue_id])) <= angstrom:
                         neighbourcount += 1

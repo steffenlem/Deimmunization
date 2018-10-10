@@ -1,3 +1,4 @@
+# Indexing every aminoacidclass
 aminoacid_classes_by_number = {
     0: '-',  # negative
     1: 'o',  # alcoholic
@@ -12,6 +13,7 @@ aminoacid_classes_by_number = {
     10: 'h'  # hydrophobic
 }
 
+# Aminoacid contained in each aminoacidclass
 aminoacid_classes_by_code = {
     '-': ['D', 'E'],
     'o': ['S', 'T'],
@@ -26,6 +28,7 @@ aminoacid_classes_by_code = {
     'h': ['A', 'C', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'R', 'T', 'V', 'W', 'Y']
 }
 
+# Encoding simple index for each onletter-aminoacid-code
 one_letter_encoding_to_number = {
     'A': 0, 'C': 1, 'D': 2, 'E': 3, 'F': 4,
     'G': 5, 'H': 6, 'I': 7, 'K': 8, 'L': 9,
@@ -33,6 +36,7 @@ one_letter_encoding_to_number = {
     'S': 15, 'T': 16, 'V': 17, 'W': 18, 'Y': 19
 }
 
+# Encoding each onletter-aminoacid-code for simple indeces
 one_letter_encoding_to_letter = {
     0: 'A', 1: 'C', 2: 'D', 3: 'E', 4: 'F',
     5: 'G', 6: 'H', 7: 'I', 8: 'K', 9: 'L',

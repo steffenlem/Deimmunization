@@ -1,5 +1,6 @@
 
 def write_ddG_trainings_data(angstrom, data):
+    # Write trainings data file for regression
     with open('data/regression_trainings_data/contact_blomap_' + str(angstrom) + 'A.csv', 'w') as f:
         content = ''
         for element in data:

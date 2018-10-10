@@ -9,16 +9,24 @@ LOG.setLevel(logging.INFO)
 
 
 def parse_and_setup_info(inputfile, reference_sequence):
+    # Read file
     LOG.info("Start Read")
     with open(inputfile) as text:
         msa = []
         for line in text:
             if not (len(line.replace('.', '').strip()) == 0):
                 msa.append(line)
+
+    # Remove title (first) line
     content = remove_title(msa)
+
+    # Remove simple consent sequences
     content = remove_non_sequences(content)
+
+    # Reduce spaces between strings
     content = reduce_space(remove_newline(content))
 
+    # Save file content in stringlist grouped by paragraphs
     LOG.info("Start Grouping Content")
     msa_content = []
     for i in content:
