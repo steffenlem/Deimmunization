@@ -24,7 +24,7 @@ LOG.setLevel(logging.INFO)
 
 
 # sudo python3 setup.py install
-# deimmunization -in /home/steffen/Documents/Deimmunization/data/Isomerase_90_similarity.clustal_num -rs 2WCV_Paris -t 0.5 -a DRB1_0301,DRB1_0701,DRB1_1501 -p /home/steffen/netMHCIIpan-3.2/netMHCIIpan
+# deimmunization -in /home/steffen/Documents/Deimmunization/data/Isomerase_90_similarity.clustal_num -rs 2WCV_Paris -t 0.5 -a DRB1_0301,DRB1_0701,DRB1_1501 -mp /home/steffen/netMHCIIpan-3.2/netMHCIIpan -pdb /home/steffen/Documents/Deimmunization/data/2wcv.pdb -pos 2 -mt 2
 
 
 @click.command()
@@ -49,7 +49,10 @@ LOG.setLevel(logging.INFO)
               help='path to pdb file', required=True)
 
 # TODO implement additional option for positions to avoid in the muatation process
-def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_pan, pdb_file):
+def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_pan, pdb_file, pos_to_check, number_mutations):
+    print(number_mutations)
+    print(pos_to_check)
+    
     # Split MHC-alleles
     mhc_alleles = [c.strip() for c in mhc_alleles.split(',')]
     print(mhc_alleles)
@@ -88,10 +91,11 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_p
     target_sequence.calculate_binding_core()
     target_sequence.make_queue_mutation()
 
-    # Settings for the deimmunization
-    number_mutations = 2
-    positions_to_check = 2
-
+    # Convert settings paramerts
+    number_mutations = int(number_mutations)
+    pos_to_check = int(pos_to_check)
+    
+    
     # variables
     inital_immunigenicity = target_sequence.base_immunogenicity
     final_mutations = []
@@ -134,7 +138,7 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_allele, mhc_ii_p
         # Indroduced muations
         current_mutations = []
 
-        for x in range(positions_to_check):
+        for x in range(pos_to_check):
             # index of residue to mutate
             position = queue[x]
 
