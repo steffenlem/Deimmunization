@@ -7,10 +7,10 @@ def do_and_return_pointmutation(encoded_pdb_informations, residue_id, chain,  ne
     for residue_info in encoded_pdb_informations:
         if residue_info[1][0] == residue_id and residue_info[1][1] == chain:
             if len(new_residue) == 1:
-                residue_info[1] = blopmap_encode_one_letter(new_residue)
+                output_vector = blopmap_encode_one_letter(new_residue)
             elif len(new_residue) == 3:
-                residue_info[1] = blopmap_encode_three_letter(new_residue)
-            return residue_info
+                output_vector = blopmap_encode_three_letter(new_residue)
+            return [residue_info[0], output_vector, residue_info[2], residue_info[3]]
     raise ValueError('The given residue id does not exist in this pdb-file!')
 
 
