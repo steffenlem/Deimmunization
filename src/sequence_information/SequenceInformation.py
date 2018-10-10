@@ -99,8 +99,8 @@ class SequenceInformation:
         """
         with open(path, 'w') as f:
             f.write('>sequence\n')
-            for x in self.sequence:
-                f.write(str(x))
+            for aa in self.sequence:
+                f.write(str(aa))
 
     def write_neighbour_chunk(self, index, amino_acid):
         """
@@ -136,8 +136,8 @@ class SequenceInformation:
 
         with open('data/temp.fasta', 'w') as f:
             f.write('>sequence\n')
-            for x in chunk:
-                f.write(str(x))
+            for pos in chunk:
+                f.write(str(pos))
 
     def calculate_base_immunogenicity(self):
         """
@@ -146,8 +146,8 @@ class SequenceInformation:
         """
         immunogenicity = 0
         # counts the number of epitopes found by NetMHCIIpan and sums them up
-        for allele in self.epitope_prediction:
-            for x in allele:
+        for all_alleles in self.epitope_prediction:
+            for epitope in all_alleles:
                 immunogenicity += 1
         self.base_immunogenicity = immunogenicity
 
@@ -181,12 +181,12 @@ class SequenceInformation:
         self.write_neighbour_chunk(index, amino_acid)
         peptide_length = 15
         immunogenicity = 0
-        for allele in self.epitope_prediction:
-            for x in allele:
-                if not ((x[0] <= (index + 1)) and (x[0] > index - (peptide_length - 1))):
+        for all_alleles in self.epitope_prediction:
+            for allele in all_alleles:
+                if not ((allele[0] <= (index + 1)) and (allele[0] > index - (peptide_length - 1))):
                     immunogenicity += 1
 
-            new_imm += len(parse_netMHCIIpan(mhc_pan_path, 'data/temp.fasta', allele[0][1]))
+            new_imm += len(parse_netMHCIIpan(mhc_pan_path, 'data/temp.fasta', all_alleles[0][1]))
 
         return immunogenicity + new_imm
 
@@ -215,32 +215,32 @@ class SequenceInformation:
         :return: [index of start of core, number of cores]
         """
         calc_epitope = {}
-        for allele in self.epitope_prediction:
-            for x in allele:
-                for z in range(9):
+        for all_alleles in self.epitope_prediction:
+            for allele in all_alleles:
+                for pos in range(9):
 
-                    if x[3] - 1 + z in calc_epitope:
-                        calc_epitope[x[3] - 1 + z] = calc_epitope[x[3] - 1 + z] + 1
+                    if allele[3] - 1 + pos in calc_epitope:
+                        calc_epitope[allele[3] - 1 + pos] = calc_epitope[allele[3] - 1 + pos] + 1
                     else:
-                        calc_epitope[x[3] - 1 + z] = 1
+                        calc_epitope[allele[3] - 1 + pos] = 1
         self.part_of_core_pos = [[key, value] for key, value in calc_epitope.items()]
-        self.part_of_core_pos.sort(key=lambda y: y[1], reverse=True) # TODO 'best position'...
+        self.part_of_core_pos.sort(key=lambda y: y[1], reverse=True)
 
     def make_queue_mutation(self):
         """
         Creates a queue for sequences to be mutated
         :return: void
         """
-        mutatbale_pos = [x[0] for x in self.determine_mutable_positions()]
-        for x in self.part_of_core_pos:
-            if x[0] in mutatbale_pos:
-                self.queue.append(x[0])
+        mutatbale_pos = [pos[0] for pos in self.determine_mutable_positions()]
+        for pos in self.part_of_core_pos:
+            if pos[0] in mutatbale_pos:
+                self.queue.append(pos[0])
 
     def introduce_mutations(self, mutations):
         if mutations is None:
             pass
         else:
-            for x in mutations:
-                self.set_sequence_pos(x.amino_acid, x.index)
+            for pos in mutations:
+                self.set_sequence_pos(pos.amino_acid, pos.index)
 
 
