@@ -79,12 +79,12 @@ def sort_epitope_pred_per_index(epitopes_per_index):
 
 
 def fill_missing_val_epitope_pred(epitopes_per_index):
-    sorted_before = sorted(epitopes_per_index, key=itemgetter(0))  # sort per index
+    sorted_epitope_per_index = sorted(epitopes_per_index, key=itemgetter(0))  # sort per index
 
     # fill in missing values
     i = 1
     prev_val = 1
-    for val in sorted_before:
+    for val in sorted_epitope_per_index:
         if val[0] != i:
             for j in range(val[0] - prev_val):
                 epitopes_per_index.append([j + prev_val, 0])
@@ -96,17 +96,17 @@ def fill_missing_val_epitope_pred(epitopes_per_index):
 
 def create_epitope_pred_plot(X, y, plot_number, highest_epitope_count):
     # plot before
-    pos_before = np.arange(len(y))
+    pos = np.arange(len(y))
 
     ax = plt.axes()
-    ax.set_xticks(pos_before)
+    ax.set_xticks(pos)
     ax.set_xticklabels(X, fontsize=6)
 
     keep_only_nth_label(ax)
 
     plt.figure(plot_number)
-    plt.plot(pos_before, y, color='b')
-    plt.bar(pos_before, y, width, color='r')
+    plt.plot(pos, y, color='b')
+    plt.bar(pos, y, width, color='r')
     plt.ylim(top=highest_epitope_count + 2)
 
     return plt
