@@ -20,6 +20,7 @@ def write_test_data_for_ddg_regression():
             # Setup PDBParser
             path = 'data/pdb_files/' + x[0] + '.pdb'
             structure = PDBParser().get_structure('X', path)
+            # Compute contact information for residue x
             element = get_contact_info(structure, path, x[1], a, int(x[3]))
             element[1].extend(blopmap_encode_one_letter(x[4]))
             element[len(element)-1].append(float(x[7]))

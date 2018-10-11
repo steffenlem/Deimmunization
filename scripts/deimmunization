@@ -54,6 +54,8 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
     # write_test_data_for_ddg_regression()
 
     # Read contact informations from pdb-file
+    # encoded_pdb_information =
+    #                  [[[blomap of residue], [residue_id, chain], [neighbourcount], [secondary structure]], [...], ...]
     # encoded_pdb_informations = parse_and_encode_pdb(pdb_file, 7)
     # for i in encoded_pdb_informations:
     #     print(i)
