@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_epitope_spread(epitopes_per_index_before, epitopes_per_index_after):
+def plot_epitope_spread(epitopes_per_index_before, epitopes_per_index_after, protein_length):
     """
     plots the epitope spread as a barplot with an additional lineplot
     :param epitopes_per_index_before: expected to be sorted by epitope count!
@@ -47,8 +47,8 @@ def plot_epitope_spread(epitopes_per_index_before, epitopes_per_index_after):
     highest_epitope_count = max(epitopes_per_index_before[0][1], epitopes_per_index_after[0][1])
 
     # fill any missing values for both sets
-    epitopes_per_index_before = fill_missing_val_epitope_pred(epitopes_per_index_before)
-    epitopes_per_index_after = fill_missing_val_epitope_pred(epitopes_per_index_after)
+    epitopes_per_index_before = fill_missing_val_epitope_pred(epitopes_per_index_before, protein_length)
+    epitopes_per_index_after = fill_missing_val_epitope_pred(epitopes_per_index_after, protein_length)
 
     # sort both sets according to the index
     sorted_epitopes_before_np = sort_epitope_pred_per_index(epitopes_per_index_before)
@@ -78,7 +78,7 @@ def sort_epitope_pred_per_index(epitopes_per_index):
     return sorted_epitopes_np
 
 
-def fill_missing_val_epitope_pred(epitopes_per_index):
+def fill_missing_val_epitope_pred(epitopes_per_index, protein_length):
     sorted_epitope_per_index = sorted(epitopes_per_index, key=itemgetter(0))  # sort per index
 
     # fill in missing values
@@ -89,7 +89,12 @@ def fill_missing_val_epitope_pred(epitopes_per_index):
             for j in range(val[0] - prev_val):
                 epitopes_per_index.append([j + prev_val, 0])
         i = val[0] + 1
-        prev_val = val[0]
+        prev_val = val[0] + 1
+
+    if epitopes_per_index[len(epitopes_per_index) - 1][0] < protein_length:
+        print(len(epitopes_per_index))
+        for index in range(protein_length - len(epitopes_per_index)):
+            epitopes_per_index.append([index + protein_length, 0])
 
     return epitopes_per_index
 
@@ -105,11 +110,13 @@ def create_epitope_pred_plot(X, y, plot_number, highest_epitope_count):
     keep_only_nth_label(ax)
 
     plt.figure(plot_number)
-    plt.plot(pos, y, color='b')
+    plt.xlabel("Amino Acid")
+    plt.ylabel("Epitope Count")
+    plt.plot(pos, y, color='r')
     plt.bar(pos, y, width, color='r')
     plt.ylim(top=highest_epitope_count + 2)
 
     return plt
 
 
-plot_epitope_spread(before, after)
+plot_epitope_spread(before, after, 140)
