@@ -3,7 +3,7 @@ class PointMutation:
     instance of the class store the information about the point mutation itself and its effect
     """
 
-    def __init__(self, amino_acid, index, immunogenicity, ddG):
+    def __init__(self, amino_acid, index, immunogenicity, ddG, oldAA):
         """
         Constructor
         :param amino_acid: amino_acid after mutation
@@ -13,6 +13,7 @@ class PointMutation:
         self.index = index
         self.immunogenicity = immunogenicity
         self.ddG = ddG
+        self.oldAA = oldAA
 
     @property
     def amino_acid(self):
@@ -62,6 +63,19 @@ class PointMutation:
     def ddG(self):
         del self.ddG
 
+    @property
+    def oldAA(self):
+        return self._oldAA
+
+    @oldAA.setter
+    def oldAA(self, value):
+        self._oldAA = value
+
+    @oldAA.deleter
+    def oldAA(self):
+        del self.oldAA
+
+
     def __str__(self):
-        return 'Index: ' + str(self.index) + '   ' + 'AA: ' + str(self.amino_acid) + '   ' + 'I: ' + str(
+        return 'Wild type residue: ' + str(self.oldAA) + '   ' + 'Index: ' + str(self.index + 1) + '   ' + 'Mutated residue: ' + str(self.amino_acid) + '   ' + 'Immunogenicity: ' + str(
             self.immunogenicity) + '   ' + 'ddG: ' + str(self.ddG)
