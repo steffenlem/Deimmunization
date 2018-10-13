@@ -77,5 +77,5 @@ class PointMutation:
 
 
     def __str__(self):
-        return 'oldAA: ' + str(self.oldAA) + '   ' + 'Index: ' + str(self.index + 1) + '   ' + 'AA: ' + str(self.amino_acid) + '   ' + 'I: ' + str(
+        return 'Wild type residue: ' + str(self.oldAA) + '   ' + 'Index: ' + str(self.index + 1) + '   ' + 'Mutated residue: ' + str(self.amino_acid) + '   ' + 'Immunogenicity: ' + str(
             self.immunogenicity) + '   ' + 'ddG: ' + str(self.ddG)

@@ -50,26 +50,21 @@ LOG.setLevel(logging.INFO)
 @click.option('-w', '--weight', prompt='weighting factorn',
               help='Weighting factor between deimmunization and ddG. A low value favors low immunity and a high value'
                    'favors a stable protein', required=True)
+@click.option('-frq', '--allele_frequency', prompt='allele frequency',
+              help='Frequency of the alleles in the target population. The frequencies have to be comma separated',
+              required=True, default=1, type=str)
 def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_pan, pdb_file, pos_to_check,
-         number_mutations, pdb_chain, weight):
-    # Split MHC-alleles
+         number_mutations, pdb_chain, weight, allele_frequency):
+    # Split MHC-alleles, and frequencies
     mhc_alleles = [c.strip() for c in mhc_alleles.split(',')]
-    print(mhc_alleles)
-
-    # Write data for ddG-regression
-    # write_test_data_for_ddg_regression()
+    allele_frequency = [float(c.strip()) for c in allele_frequency.split(',')]
+    mhc_alleles = dict(zip(mhc_alleles, allele_frequency))
 
     # Read contact informations from pdb-file
     encoded_pdb_informations = parse_and_encode_pdb(pdb_file, 7)
-    # mutations = []
-    # asdf = do_and_return_pointmutation(encoded_pdb_informations, 12, 'A', 'A')[:-1]
-    # asdf = [item for sublist in asdf for item in sublist]
-    # to_train = pd.DataFrame(data=asdf).T
 
     # train regressor
     regressor = train_regressor('/home/steffen/Documents/Deimmunization/data/inputfiles/contact_blomap_7A.csv')
-
-    # print(regressor.predict(to_train))
 
     # Construct an MSA Object, which contains the information about the MSA
     my_msa = MSA(input_msa, reference_sequence, majority_threshold)
@@ -78,13 +73,11 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
     # Information about the sequenece (eptitopes, msa, ...) is bundled
     target_sequence = SequenceInformation(my_msa.get_sequence(), my_msa.get_consensus_sequence())
 
-    # Predict the Epitopes using netMHCIIpan and parse the output of netMHCIIpan to
-    for allele in mhc_alleles:
-        parsed_data = parse_netMHCIIpan(mhc_ii_pan, 'data/ref_sequence.fasta', allele)
-        target_sequence.set_allele_prediction(parsed_data)
-
+    target_sequence.set_mhc_alleles(mhc_alleles)
+    target_sequence.predictEpitopes(mhc_ii_pan, 'data/ref_sequence.fasta')
     target_sequence.calculate_base_immunogenicity()
     target_sequence.calculate_binding_core()
+    target_sequence.calculate_binding_core_weighted()
     target_sequence.make_queue_mutation()
 
     # Convert settings paramerts
@@ -95,13 +88,10 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
     inital_immunigenicity = target_sequence.base_immunogenicity
     final_mutations = []
     queue = target_sequence.queue
-    print(queue)
-
-    print('Base:' + str(target_sequence.base_immunogenicity))
 
     # deimmunization loop
     while number_mutations > len(final_mutations):
-        print('Computing ' + str(len(final_mutations)+1)+ '. iteration ...')
+        print('Computing ' + str(len(final_mutations) + 1) + '. iteration ...')
 
         # create temporary sequence class
         temp_sequence = SequenceInformation(my_msa.get_sequence(), my_msa.get_consensus_sequence())
@@ -110,14 +100,12 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
         # write sequence to file for netMHCIIpan
         temp_sequence.write_sequence('data/temp.fasta')
 
-        # make prediction for all alleles
-        for allele in mhc_alleles:
-            parsed_data = parse_netMHCIIpan(mhc_ii_pan, 'data/temp.fasta', allele)
-            temp_sequence.set_allele_prediction(parsed_data)
+        temp_sequence.set_mhc_alleles(mhc_alleles)
+        temp_sequence.predictEpitopes(mhc_ii_pan, 'data/temp.fasta')
 
         # calculate temp values
         temp_sequence.calculate_base_immunogenicity()
-        temp_sequence.calculate_binding_core()
+        temp_sequence.calculate_binding_core_weighted()
         temp_sequence.make_queue_mutation()
 
         # Update queue
@@ -142,25 +130,20 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
             current_residue = temp_sequence.get_sequence_pos(position)
             current_amino_group = temp_sequence.msa[position][1]
 
-            # List of amino acids to check  #
             one_letter_code = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'I', 'L', 'K', 'M', 'F', 'S', 'T', 'W', 'Y',
                                'V', 'H']
-            # mutations_to_check = one_letter_code.copy()
-            # mutations_to_check.remove(current_residue)
 
 
-            #try:
-                #mutations_to_check = mutation_order_by_group[current_amino_group].copy()
-            #except:
-            mutations_to_check = one_letter_code.copy()
-
+            # if t
+            try:
+                mutations_to_check = mutation_order_by_group[current_amino_group].copy()
+            except:
+                mutations_to_check = one_letter_code.copy()
 
             try:
                 mutations_to_check.remove(current_residue)
             except:
                 pass
-
-
 
             for aa in mutations_to_check:
                 feature_vector_aa = do_and_return_pointmutation(encoded_pdb_informations, position + 1, pdb_chain, aa)
@@ -180,24 +163,21 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
     new_sequence = SequenceInformation(my_msa.get_sequence(), my_msa.get_consensus_sequence())
     new_sequence.introduce_mutations(final_mutations)
     new_sequence.write_sequence('data/new_sequence.fasta')
-
-    # make prediction for all alleles
-    for allele in mhc_alleles:
-        prediction_data = parse_netMHCIIpan(mhc_ii_pan, 'data/new_sequence.fasta', allele)
-        new_sequence.set_allele_prediction(prediction_data)
-
+    new_sequence.set_mhc_alleles(mhc_alleles)
+    new_sequence.predictEpitopes(mhc_ii_pan, 'data/new_sequence.fasta')
     new_sequence.calculate_base_immunogenicity()
     new_sequence.calculate_binding_core()
 
-    print('Base:' + str(new_sequence.base_immunogenicity))
+    print('Immunogenicity before :' + str(target_sequence.base_immunogenicity))
+    print('Immunogenicity after :' + str(new_sequence.base_immunogenicity))
+    print('Epitope count before :' + str(target_sequence.get_number_epitopes()))
+    print('Epitope count after :' + str(new_sequence.get_number_epitopes()))
 
     # plot epitopes
-    print(target_sequence.part_of_core_pos)
-    print(new_sequence.part_of_core_pos)
+    max_immunogenicity = max(target_sequence.part_of_core_pos[0][1], new_sequence.part_of_core_pos[0][1])
 
-
-    plot_epitopes(target_sequence.get_length_sequence(), target_sequence.part_of_core_pos)
-    plot_epitopes(new_sequence.get_length_sequence(), new_sequence.part_of_core_pos)
+    plot_epitopes(target_sequence.get_length_sequence(), target_sequence.part_of_core_pos, max_immunogenicity)
+    plot_epitopes(new_sequence.get_length_sequence(), new_sequence.part_of_core_pos, max_immunogenicity)
 
 
 def decision_function_immnogenicity(mutations):
@@ -211,12 +191,13 @@ def decision_function_immnogenicity(mutations):
 def decision_function_simple(mutations, weight):
     best_mutation = PointMutation('', -1, float('inf'), float('-inf'), '')
     for mut in mutations:
-        if (mut.immunogenicity - (weight * mut.ddG) < best_mutation.immunogenicity - (weight * best_mutation.ddG)) and (mut.immunogenicity < best_mutation.immunogenicity):
+        if (mut.immunogenicity - (weight * mut.ddG) < best_mutation.immunogenicity - (weight * best_mutation.ddG)) and (
+                mut.immunogenicity < best_mutation.immunogenicity):
             best_mutation = mut
     return best_mutation
 
 
-def plot_epitopes(length_sequence, epitopes):
+def plot_epitopes(length_sequence, epitopes, max_immunogenicity):
     """
     :param length_sequence: length of sequence
     :param epitopes:
@@ -226,6 +207,7 @@ def plot_epitopes(length_sequence, epitopes):
     for amino_acid in epitopes:
         plottable_data[amino_acid[0]] = amino_acid[1]
     plt.plot(plottable_data)
+    plt.ylim(top=max_immunogenicity + 2)
     plt.show()
 
 

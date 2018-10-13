@@ -9,15 +9,17 @@ class SequenceInformation:
         - msa:                  Multiple Sequence Alignment (MSA), as described in the MSA class
         - epitope_prediction:   epitope prediction data - array of prediction data for single allele
         - base_immunogenicity:  immnogenicity of sequence without any mutations
-        - effect_of_mutation:   [amino_acid, index, immunogenicity, ddG] --> Index of array not pos in sequence
+        - part_of_core_pos      [index, number of binding cores the amino acid is part of]
+        - queue                 list of idices of amino acids which are  mutable (sorted with decreasing immunogenicty)
     """
     sequence = []
     msa = []
     epitope_prediction = []
     base_immunogenicity = 0
-    effect_of_mutation = []
     part_of_core_pos = []
     queue = []
+    mhc_alleles = []
+    part_of_core_pos_weighted = []
 
     def __init__(self, sequence, msa):
         """
@@ -27,9 +29,10 @@ class SequenceInformation:
         self.msa = msa
         self.epitope_prediction = []
         self.base_immunogenicity = 0
-        self.effect_of_mutation = []
         self.part_of_core_pos = {}
         self.queue = []
+        self.mhc_alleles = []
+        self.part_of_core_pos_weighted = []
 
     def set_allele_prediction(self, prediction):
         """
@@ -84,6 +87,21 @@ class SequenceInformation:
         """
         return self.msa
 
+    def set_mhc_alleles(self, mhc_alleles):
+        """
+        Setter for MHC allele frequency data
+        :param mhc_alleles: dictionary with mhc allele as key and frequency as value
+        """
+        self.mhc_alleles = mhc_alleles
+
+    def get_mhc_alleles(self):
+        """
+        Getter for MHC allele information
+        :return: mhc allele information
+        """
+        return self.mhc_alleles
+
+
     def base_immunogenicity(self):
         """
         Getter for base base_immunogenicity
@@ -101,6 +119,14 @@ class SequenceInformation:
             f.write('>sequence\n')
             for aa in self.sequence:
                 f.write(str(aa))
+
+
+    def get_number_epitopes(self):
+        count = 0
+        for allele in self.epitope_prediction:
+            for epitope in allele:
+                count += 1
+        return count
 
     def write_neighbour_chunk(self, index, amino_acid):
         """
@@ -148,26 +174,9 @@ class SequenceInformation:
         # counts the number of epitopes found by NetMHCIIpan and sums them up
         for all_alleles in self.epitope_prediction:
             for epitope in all_alleles:
-                immunogenicity += 1
+                immunogenicity += self.mhc_alleles[epitope[1]]
         self.base_immunogenicity = immunogenicity
 
-    def append_effect_of_mutation(self, amino_acid, index, immunogenicity, ddG):
-        """
-        Adds array containing this function's parameters information to the effect_of_mutation array
-        :param amino_acid: amino acid after muation
-        :param index:  index of muation in the sequence
-        :param immunogenicity: value for immunogenicity
-        :param ddG: value for free folding energy
-        :return: void
-        """
-        self.effect_of_mutation.append([amino_acid, index, immunogenicity, ddG])
-
-    def get_effect_of_mutation(self):
-        """
-        Getter for effect_of_mutation array
-        :return: the array
-        """
-        return self.effect_of_mutation
 
     def update_immunogenicity(self, amino_acid, index, mhc_pan_path):
         """
@@ -181,12 +190,13 @@ class SequenceInformation:
         self.write_neighbour_chunk(index, amino_acid)
         peptide_length = 15
         immunogenicity = 0
-        for all_alleles in self.epitope_prediction:
-            for allele in all_alleles:
-                if not ((allele[0] <= (index + 1)) and (allele[0] > index - (peptide_length - 1))):
-                    immunogenicity += 1
+        for allele in self.epitope_prediction:
+            for epitope in allele:
+                if not ((epitope[0] <= (index + 1)) and (epitope[0] > index - (peptide_length - 1))):
+                    immunogenicity += self.mhc_alleles[epitope[1]]
 
-            new_imm += len(parse_netMHCIIpan(mhc_pan_path, 'data/temp.fasta', all_alleles[0][1]))
+            prediction = parse_netMHCIIpan(mhc_pan_path, 'data/temp.fasta', allele[0][1])
+            new_imm += len(prediction) * self.mhc_alleles[allele[0][1]]
 
         return immunogenicity + new_imm
 
@@ -232,7 +242,7 @@ class SequenceInformation:
         :return: void
         """
         mutatbale_pos = [pos[0] for pos in self.determine_mutable_positions()]
-        for pos in self.part_of_core_pos:
+        for pos in self.part_of_core_pos_weighted:
             if pos[0] in mutatbale_pos:
                 self.queue.append(pos[0])
 
@@ -243,4 +253,25 @@ class SequenceInformation:
             for pos in mutations:
                 self.set_sequence_pos(pos.amino_acid, pos.index)
 
+    def predictEpitopes(self, mhc_ii_pan, temporary_output_path):
+        for allele in self.mhc_alleles:
+            prediction_data = parse_netMHCIIpan(mhc_ii_pan, temporary_output_path, allele)
+            self.set_allele_prediction(prediction_data)
 
+
+    def calculate_binding_core_weighted(self):
+        """
+        Calculates number of epitope binding cores the amino acids are part of
+        :return: [index of start of core, number of cores]
+        """
+        calc_epitope = {}
+        for allele in self.epitope_prediction:
+            for epitope in allele:
+                for pos in range(9):
+
+                    if epitope[3] - 1 + pos in calc_epitope:
+                        calc_epitope[epitope[3] - 1 + pos] = calc_epitope[epitope[3] - 1 + pos] + self.mhc_alleles[epitope[1]]
+                    else:
+                        calc_epitope[epitope[3] - 1 + pos] = self.mhc_alleles[epitope[1]]
+        self.part_of_core_pos_weighted = [[key, value] for key, value in calc_epitope.items()]
+        self.part_of_core_pos_weighted.sort(key=lambda y: y[1], reverse=True)
