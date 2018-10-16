@@ -63,6 +63,9 @@ def find_secondary_struct_of_residue(residue_id, pdb_path):
                 else:
                     x = 5
                     y = 8
-                if residue_id in range(int(line_content_list[x]), int(line_content_list[y]) + 1):
-                    return [1, 0, 0]
+                try:
+                    if residue_id in range(int(line_content_list[x]), int(line_content_list[y]) + 1):
+                        return [1, 0, 0]
+                except:
+                    pass
     return [0, 0, 1]
