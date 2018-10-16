@@ -26,16 +26,20 @@ aminoacid_classes_by_code = {
     'h': ['A', 'C', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'R', 'T', 'V', 'W', 'Y']
 }
 
+# Encoding simple index for each onletter-aminoacid-code (X stands for unknown aminoacid)
 one_letter_encoding_to_number = {
     'A': 0, 'C': 1, 'D': 2, 'E': 3, 'F': 4,
     'G': 5, 'H': 6, 'I': 7, 'K': 8, 'L': 9,
     'M': 10, 'N': 11, 'P': 12, 'Q': 13, 'R': 14,
-    'S': 15, 'T': 16, 'V': 17, 'W': 18, 'Y': 19
+    'S': 15, 'T': 16, 'V': 17, 'W': 18, 'Y': 19,
+    'X': 20
 }
 
+# Encoding each onletter-aminoacid-code (X stands for unknown aminoacid) for simple indeces
 one_letter_encoding_to_letter = {
     0: 'A', 1: 'C', 2: 'D', 3: 'E', 4: 'F',
     5: 'G', 6: 'H', 7: 'I', 8: 'K', 9: 'L',
     10: 'M', 11: 'N', 12: 'P', 13: 'Q', 14: 'R',
-    15: 'S', 16: 'T', 17: 'V', 18: 'W', 19: 'Y'
+    15: 'S', 16: 'T', 17: 'V', 18: 'W', 19: 'Y',
+    20: 'X'
 }
