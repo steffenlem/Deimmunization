@@ -6,7 +6,7 @@ import click
 import logging
 import pandas as pd
 
-from ....MSAParser.model.MSA import MSA
+from src.MSAParser.model.MSA import MSA
 from src.netMHCIIpanParser.netMHCIIparser import parse_netMHCIIpan
 from src.sequence_information.SequenceInformation import SequenceInformation
 from src.mutationRules.mutationRules import mutation_order_by_group
