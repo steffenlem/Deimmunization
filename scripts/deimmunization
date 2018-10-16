@@ -6,7 +6,7 @@ import click
 import logging
 import pandas as pd
 
-from src.MSAParser.model.MSA import MSA
+from ....MSAParser.model.MSA import MSA
 from src.netMHCIIpanParser.netMHCIIparser import parse_netMHCIIpan
 from src.sequence_information.SequenceInformation import SequenceInformation
 from src.mutationRules.mutationRules import mutation_order_by_group
@@ -65,7 +65,7 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
     encoded_pdb_informations = parse_and_encode_pdb(pdb_file, 7)
 
     # train regressor
-    regressor = train_regressor('/home/steffen/Documents/Deimmunization/data/inputfiles/contact_blomap_7A.csv')
+    regressor = train_regressor('data/inputfiles/contact_blomap_7A.csv')
 
     # Construct an MSA Object, which contains the information about the MSA
     my_msa = MSA(input_msa, reference_sequence, majority_threshold)
@@ -139,6 +139,7 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
                 mutations_to_check = mutation_order_by_group[current_amino_group].copy()
             except:
                 mutations_to_check = one_letter_code.copy()
+                print("dafaq?")
 
             try:
                 mutations_to_check.remove(current_residue)
@@ -153,7 +154,7 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
                     PointMutation(aa, position, temp_sequence.update_immunogenicity(aa, position, mhc_ii_pan),
                                   ddG_aa[0], target_sequence.get_sequence_pos(position)))
 
-        final_mutations.append(decision_function_simple(current_mutations, int(weight)))
+        final_mutations.append(decision_function_simple(current_mutations, float(weight)))
 
     # Print final mutations
     for mutation in final_mutations:
@@ -167,6 +168,7 @@ def main(input_msa, reference_sequence, majority_threshold, mhc_alleles, mhc_ii_
     new_sequence.predictEpitopes(mhc_ii_pan, 'data/new_sequence.fasta')
     new_sequence.calculate_base_immunogenicity()
     new_sequence.calculate_binding_core()
+    new_sequence.write_sequence('data/mutated_sequence.fasta')
 
     print('Immunogenicity before :' + str(target_sequence.base_immunogenicity))
     print('Immunogenicity after :' + str(new_sequence.base_immunogenicity))
